@@ -7,12 +7,15 @@ const connectToSupabase = () => {
   const supabaseUrl = process.env.PROJECT_URL;
   const supabaseKey = process.env.SUPABASE_KEY;
   const supabase = createClient(supabaseUrl, supabaseKey);
-  console.log("Connected to Supabase.")
+  if (supabase) {
+    console.log("Connected to Supabase.");
+  } else {
+    console.log("Error connecting to Supabase.");
+  }
+
   return supabase;
 };
 
-const getUsers = () => {
-    
-}
+const getUsers = () => {};
 
 export default connectToSupabase;
