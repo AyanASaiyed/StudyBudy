@@ -1,2 +1,3 @@
-# StudBud
-A personal Ai Study Buddy.
+#StudyBudy
+
+A personal AI Study Buddy.
