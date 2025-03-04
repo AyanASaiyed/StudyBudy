@@ -1,30 +1,16 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import supabase from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 export default function Home() {
-  const [users, setUsers] = useState<any[]>([]);
-
-  useEffect(() => {
-    async function fetchUsers() {
-      const { data, error } = await supabase.from("profiles").select("*");
-      if (data) {
-        setUsers(data);
-        console.log(data);
-      }
-
-      if (error) {
-        console.log("Error Fetching users from Supabase: ", error);
-      }
-    }
-
-    fetchUsers();
-  }, []);
+  const router = useRouter();
 
   const googleSignIn = async () => {
-    await signIn("google", { callbackUrl: "/" });
+    const res = await signIn("google", { callbackUrl: "/home" });
+    if (res?.ok) {
+      router.push("/home");
+    }
   };
 
   return (
