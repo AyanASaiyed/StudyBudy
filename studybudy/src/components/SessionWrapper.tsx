@@ -1,5 +1,5 @@
-"use client"; // Important to mark this as a client component
-import { SessionProvider } from "next-auth/react"; // Import SessionProvider
+"use client";
+import { SessionProvider } from "next-auth/react";
 
 export default function SessionWrapper({
   children,

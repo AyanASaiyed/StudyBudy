@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import SessionWrapper from "@/components/SessionWrapper"; // Import the SessionWrapper component
+import SessionWrapper from "@/components/SessionWrapper";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +29,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionWrapper>{children}</SessionWrapper>{" "}
-        {/* Wrap with SessionWrapper */}
       </body>
     </html>
   );

@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-teal-400 font-bold text-5xl">StudyBudy</h1>
-      <p className="mt-5 text-2xl font-extralight">
+      <p className="mt-5 text-2xl fonta-extralight text-white">
         Your very own personal AI study buddy📝!
       </p>
       <Button
@@ -26,11 +26,6 @@ export default function Home() {
       >
         Login with Google
       </Button>
-      {/* <div className="text-white font-extrabold">
-        {users.map((user) => (
-          <p key={user.id}>{user.full_name}</p>
-        ))}
-      </div> */}
     </div>
   );
 }

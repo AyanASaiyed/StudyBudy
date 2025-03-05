@@ -1,12 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { verifyJWTToken } from "../../../lib/jwt";
 
-export async function GET(req: Request) {
-  const token = req.headers.get("authorization")?.split(" ")[1];
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
 
-  if (!token || !verifyJWTToken(token)) {
+  if (!authHeader) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  return NextResponse.json({ message: "Welcome Authorized User" });
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = verifyJWTToken(token);
+    console.log("Verified User: ", decoded);
+
+    return NextResponse.json({
+      content: `Hello ${decoded.email}, you have access to protected content`,
+    });
+  } catch (error) {
+    return NextResponse.json({ message: "Invalid Token" }, { status: 401 });
+  }
 }

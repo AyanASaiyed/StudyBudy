@@ -1,3 +1,4 @@
+"use server";
 import { generateJWTToken } from "@/lib/jwt";
 import NextAuth from "next-auth";
 import supabase from "@/lib/supabase";
@@ -28,11 +29,13 @@ export const authOptions = {
         const jwtToken = generateJWTToken(user);
         token.accessToken = jwtToken;
       }
+      console.log("JWT token: ", token);
       return token;
     },
 
     async session({ session, token }: { session: any; token: any }) {
       session.accessToken = token.accessToken;
+      console.log("Session accessToken: ", session.accessToken);
       return session;
     },
 
