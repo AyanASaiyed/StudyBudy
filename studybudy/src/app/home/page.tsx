@@ -48,7 +48,7 @@ const HomePage = () => {
   return (
     <div className="relative flex flex-col items-center justify-center h-screen text-white">
       <Avatar className="absolute top-4 right-4 shadow-black border-teal-400 border-1 shadow-xl size-12">
-        <AvatarImage src={session?.user?.image} />
+        <AvatarImage src={session?.user?.image!} />
         <AvatarFallback></AvatarFallback>
       </Avatar>
       <h1 className="font-semibold">Welcome, {session?.user?.name}!</h1>

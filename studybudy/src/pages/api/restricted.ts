@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "./auth/[...nextauth]"
 import { NextApiRequest, NextApiResponse } from 'next'
+import authOptions from "@/lib/authOptions"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getServerSession(req, res, authOptions)

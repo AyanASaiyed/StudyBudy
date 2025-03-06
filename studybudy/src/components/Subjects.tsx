@@ -1,9 +1,12 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import type React from "react";
 import { useState } from "react";
+import { json } from "stream/consumers";
 
 const Subjects = () => {
+  const { data: session } = useSession();
   const [subjects, setSubjects] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -20,20 +23,31 @@ const Subjects = () => {
     setEditIndex(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (editIndex !== null) {
       if (editIndex < subjects.length) {
-        // Edit existing subject
         const newSubjects = [...subjects];
         newSubjects[editIndex] = inputValue;
         setSubjects(newSubjects);
       } else {
-        // Add new subject
         setSubjects([...subjects, inputValue]);
       }
     }
+
+    const res = await fetch("/api/subjects", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+      body: JSON.stringify({ inputValue }),
+    });
+
+    const data = await res.json();
+    console.log("TOKENN", session?.accessToken);
+    console.log("DATA!!", data);
+    setInputValue(data);
 
     setIsModalOpen(false);
     setEditIndex(null);
@@ -53,12 +67,13 @@ const Subjects = () => {
           </div>
         ))}
 
-        {/* Add new subject box */}
         <div
           className="h-[10vh] w-[6vw] bg-neutral-700 rounded-xl hover:bg-neutral-800 hover:scale-105 transition-all shadow-lg shadow-teal-800 border border-white flex items-center justify-center cursor-pointer"
           onClick={() => handleSubjectChange(subjects.length)}
         >
-          <span className="text-6xl font-extrabold text-white flex relative top-[-1vh]">+</span>
+          <span className="text-6xl font-extrabold text-white flex relative top-[-1vh]">
+            +
+          </span>
         </div>
       </div>
 
@@ -67,9 +82,14 @@ const Subjects = () => {
           <div className="bg-neutral-800 rounded-lg p-4 w-80 shadow-xl border border-teal-700">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-white font-medium">
-                {editIndex !== null && editIndex < subjects.length ? "Edit Subject" : "New Subject"}
+                {editIndex !== null && editIndex < subjects.length
+                  ? "Edit Subject"
+                  : "New Subject"}
               </h3>
-              <button onClick={handleClose} className="text-gray-400 hover:text-white">
+              <button
+                onClick={handleClose}
+                className="text-gray-400 hover:text-white"
+              >
                 ✕
               </button>
             </div>
@@ -92,7 +112,10 @@ const Subjects = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="px-3 py-1 bg-teal-700 text-white rounded hover:bg-teal-600">
+                <button
+                  type="submit"
+                  className="px-3 py-1 bg-teal-700 text-white rounded hover:bg-teal-600"
+                >
                   Save
                 </button>
               </div>
