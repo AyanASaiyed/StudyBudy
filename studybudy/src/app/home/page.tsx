@@ -1,63 +1,63 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import Subjects from "../../components/Subjects";
+import { useEffect } from "react";
 
 const HomePage = () => {
   const { data: session, status } = useSession();
-  const [protectedContent, setProtectedContent] = useState<string | null>(null);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
   };
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      //redirect("/");
-    }
+    const fetchProtectedData = async (token: string) => {
+      const response = await fetch("/api/restricted", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    if (session) {
-      console.log("JWT Token:", session.accessToken);
+      const data = await response.json();
+
+      if (data.error) {
+        console.log("Unauthorized access");
+        redirect("/");
+      }
+    };
+
+    if (session?.accessToken) {
       fetchProtectedData(session.accessToken);
     }
-  }, [session, status]);
+  }, [session]);
 
-  const fetchProtectedData = async (token: string) => {
-    const response = await fetch("/api/restricted", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (data.content) {
-      setProtectedContent(data.content);
-    } else {
-      console.log("Unauthorized access");
-      redirect("/");
-    }
-  };
+  if (status === "loading") {
+    return (
+      <div className="text-white flex flex-col items-center justify-center h-screen font-mono">
+        Loading...
+        <p>(refresh if it's taking too long.)</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-white">
-      <h1 className="font-sembold">Welcome, {session?.user?.name}!</h1>
-      {session?.user?.image ? (
-        <img
-          src={session.user.image}
-          className="rounded-xl mt-5"
-          alt="User Avatar"
-        />
-      ) : (
-        <div className="h-[20vh] w-[20vw] bg-gray-200 rounded-full"></div>
-      )}
+    <div className="relative flex flex-col items-center justify-center h-screen text-white">
+      <Avatar className="absolute top-4 right-4 shadow-black border-teal-400 border-1 shadow-xl size-12">
+        <AvatarImage src={session?.user?.image} />
+        <AvatarFallback></AvatarFallback>
+      </Avatar>
+      <h1 className="font-semibold">Welcome, {session?.user?.name}!</h1>
+      <div className="h-screen left-0 w-[9vw] rounded-r-lg bg-neutral-800 absolute shadow-black shadow-xl border-1 border-teal-400 overflow-y-scroll">
+        <Subjects />
+      </div>
       <Button className="mt-5" onClick={handleSignOut}>
         Logout
       </Button>
-      {protectedContent && <p className="mt-5">{protectedContent}</p>}
     </div>
   );
 };
