@@ -125,6 +125,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: rgb(24, 24, 24);
+    background: rgb(10, 10, 10);
   }
 }

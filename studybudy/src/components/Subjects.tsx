@@ -2,19 +2,37 @@
 
 import { useSession } from "next-auth/react";
 import type React from "react";
-import { useState } from "react";
-import { json } from "stream/consumers";
+import { useEffect, useState } from "react";
 
 const Subjects = () => {
   const { data: session } = useSession();
   const [subjects, setSubjects] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [subject_name, setsubject_name] = useState("");
   const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/getSubjects");
+        const data = await res.json();
+        if (Array.isArray(data.data)) {
+          setSubjects(
+            data.data.map((item: { subject_name: string }) => item.subject_name)
+          );
+        } else {
+          console.error("Unexpected response format:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleSubjectChange = (index: number) => {
     setEditIndex(index);
-    setInputValue(index < subjects.length ? subjects[index] : "");
+    setsubject_name(index < subjects.length ? subjects[index] : "");
     setIsModalOpen(true);
   };
 
@@ -29,29 +47,29 @@ const Subjects = () => {
     if (editIndex !== null) {
       if (editIndex < subjects.length) {
         const newSubjects = [...subjects];
-        newSubjects[editIndex] = inputValue;
+        newSubjects[editIndex] = subject_name;
         setSubjects(newSubjects);
       } else {
-        setSubjects([...subjects, inputValue]);
+        setSubjects([...subjects, subject_name]);
       }
     }
 
     const res = await fetch("/api/subjects", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${session?.accessToken}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ inputValue }),
+      body: JSON.stringify({ subject_name }),
     });
 
     const data = await res.json();
-    console.log("TOKENN", session?.accessToken);
-    console.log("DATA!!", data);
-    setInputValue(data);
-
-    setIsModalOpen(false);
-    setEditIndex(null);
-    setInputValue("");
+    if (data.error) {
+      console.error("Error saving subject:", data.error);
+    } else {
+      setsubject_name("");
+      setIsModalOpen(false);
+      setEditIndex(null);
+    }
   };
 
   return (
@@ -60,7 +78,7 @@ const Subjects = () => {
         {subjects.map((subject, index) => (
           <div
             key={index}
-            className="h-[10vh] w-[6vw] bg-neutral-700 rounded-xl hover:bg-neutral-800 hover:scale-105 transition-all shadow-lg shadow-teal-800 border border-white flex items-center justify-center cursor-pointer"
+            className="h-[10vh] w-[6vw] bg-neutral-900 rounded-full hover:bg-teal-900 hover:scale-105 transition-all shadow-md shadow-teal-800 border border-white flex items-center justify-center cursor-pointer"
             onClick={() => handleSubjectChange(index)}
           >
             {subject}
@@ -68,7 +86,7 @@ const Subjects = () => {
         ))}
 
         <div
-          className="h-[10vh] w-[6vw] bg-neutral-700 rounded-xl hover:bg-neutral-800 hover:scale-105 transition-all shadow-lg shadow-teal-800 border border-white flex items-center justify-center cursor-pointer"
+          className="h-[10vh] w-[6vw] bg-neutral-900 rounded-full hover:bg-teal-900 hover:scale-105 transition-all border-1 shadow-md shadow-teal-800 border-white flex items-center justify-center cursor-pointer"
           onClick={() => handleSubjectChange(subjects.length)}
         >
           <span className="text-6xl font-extrabold text-white flex relative top-[-1vh]">
@@ -79,7 +97,7 @@ const Subjects = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-neutral-800 rounded-lg p-4 w-80 shadow-xl border border-teal-700">
+          <div className="bg-neutral-900 rounded-lg p-4 w-80 shadow-xl border border-teal-700">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-white font-medium">
                 {editIndex !== null && editIndex < subjects.length
@@ -97,9 +115,9 @@ const Subjects = () => {
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-full p-2 bg-neutral-700 text-white rounded border border-neutral-600 focus:border-teal-500 focus:outline-none"
+                value={subject_name}
+                onChange={(e) => setsubject_name(e.target.value)}
+                className="w-full p-2 bg-neutral-900 text-white rounded border border-neutral-800 focus:border-teal-500 focus:outline-none"
                 placeholder="Enter subject name"
                 autoFocus
               />
@@ -108,7 +126,7 @@ const Subjects = () => {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-3 py-1 bg-neutral-700 text-white rounded hover:bg-neutral-600"
+                  className="px-3 py-1 bg-neutral-900 text-white rounded hover:bg-neutral-800"
                 >
                   Cancel
                 </button>

@@ -52,7 +52,7 @@ const HomePage = () => {
         <AvatarFallback></AvatarFallback>
       </Avatar>
       <h1 className="font-semibold">Welcome, {session?.user?.name}!</h1>
-      <div className="h-screen left-0 w-[9vw] rounded-r-lg bg-neutral-800 absolute shadow-black shadow-xl border-1 border-teal-400 overflow-y-scroll">
+      <div className="h-screen left-0 w-[9vw] rounded-r-lg bg-neutral-950 absolute shadow-black shadow-xl border-r-1 border-teal-400 overflow-hidden">
         <Subjects />
       </div>
       <Button className="mt-5" onClick={handleSignOut}>
