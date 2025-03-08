@@ -14,7 +14,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   const { data: subjects, error } = await supabase
     .from("subjects")
-    .select("subject_name")
+    .select("id, subject_name")
     .eq("user_email", userEmail);
 
   if (error) {
