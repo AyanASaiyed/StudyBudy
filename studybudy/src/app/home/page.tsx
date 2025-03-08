@@ -91,7 +91,7 @@ const HomePage = () => {
       </div>
       <div className="flex flex-col items-center justify-center">
         <section className="bg-neutral-950 border-teal-400 border-1 h-[80vh] mb-15 w-[80vw] ml-15 rounded-xl">
-          <Messages />
+          <Messages subjectId={currentSubjectId ?? ''} />
         </section>
         <section className="mt-5 flex flex-col items-center justify-center">
           <UserControl subjectId={currentSubjectId} />{" "}

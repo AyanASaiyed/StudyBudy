@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import type React from "react";
 import { useEffect, useState } from "react";
 
@@ -19,7 +18,7 @@ const Subjects: React.FC<SubjectsProps> = ({ setCurrentSubjectId }) => {
         const res = await fetch("/api/getSubjects");
         const data = await res.json();
         if (Array.isArray(data.data)) {
-          console.log(data.data);
+          console.log("SUBJECTS!!", data.data);
           setSubjects(data.data);
         } else {
           console.error("Unexpected response format:", data);
