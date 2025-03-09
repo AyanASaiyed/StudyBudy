@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-teal-400 font-bold text-5xl">StudyBudy</h1>
+      <h1 className="text-indigo-400 font-bold text-5xl">StudyBudy</h1>
       <p className="mt-5 text-2xl fonta-extralight text-white">
         Your very own personal AI study buddy📝!
       </p>

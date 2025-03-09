@@ -1,48 +1,69 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
+import supabase from "@/lib/supabase";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 interface MessagesProps {
-  subjectId: string
+  subjectId: string;
 }
 
 interface Message {
-  message: string
+  message: string;
 }
 
 const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const res = await fetch("/api/getMessages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ subjectId }),
-      })
+      if (subjectId != "add-sub") {
+        const res = await fetch("/api/getMessages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ subjectId }),
+        });
 
-      const data = await res.json()
-      if (Array.isArray(data.data)) {
-        console.log("MESSAGES!!", data.data)
-        setMessages(data.data)
-      } else {
-        console.error("Unexpected response format:", data)
+        const data = await res.json();
+        if (Array.isArray(data.data)) {
+          console.log("MESSAGES!!", data.data);
+          setMessages(data.data);
+        } else {
+          console.error("Unexpected response format:", data);
+        }
       }
-    }
+    };
 
     if (subjectId) {
-      fetchMessages()
+      fetchMessages();
     }
-  }, [subjectId])
+
+    const channel = supabase
+      .channel("realtime:messages")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          console.log("MESSAGES RECEIVED: ", payload.new);
+          setMessages((prev) => [...prev, payload.new as Message]);
+        }
+      )
+      .subscribe();
+  }, [subjectId]);
 
   return (
     <div className="flex flex-col space-y-4 p-6">
       {messages.length === 0 ? (
         <div className="flex items-center justify-center h-40">
-          <p className="text-slate-400 text-sm">No messages yet. Start your learning journey!</p>
+          <p className="text-slate-400 text-sm">
+            No messages yet. Start your learning journey!
+          </p>
         </div>
       ) : (
         messages.map((messageObj, index) => (
@@ -54,8 +75,7 @@ const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
         ))
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Messages
-
+export default Messages;

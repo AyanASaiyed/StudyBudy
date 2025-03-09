@@ -1,32 +1,31 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import type React from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface UserControlProps {
-  subjectId: string | null
+  subjectId: string | null;
 }
 
 const UserControl: React.FC<UserControlProps> = ({ subjectId }) => {
-  const [message, setMessage] = useState("")
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [message, setMessage] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [message])
+  }, [message]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log(subjectId)
-    setMessage(e.target.value)
-  }
+    setMessage(e.target.value);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!message.trim() || !subjectId) return
+    if (!message.trim() || !subjectId) return;
 
     const res = await fetch("/api/saveMessage", {
       method: "POST",
@@ -34,23 +33,30 @@ const UserControl: React.FC<UserControlProps> = ({ subjectId }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ message, subjectId }),
-    })
+    });
 
-    const data = await res.json()
+    const data = await res.json();
     if (data.error) {
-      console.error("Error saving message:", data.error)
+      console.error("Error saving message:", data.error);
     } else {
-      setMessage("")
+      setMessage("");
     }
-  }
+  };
 
   return (
     <div className="w-[60vw]">
-      <form onSubmit={handleSubmit} className="relative flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="relative flex items-center justify-center"
+      >
         <textarea
           ref={textareaRef}
           className="w-full rounded-xl bg-slate-800/70 max-h-[10vh] backdrop-blur-sm border border-slate-700/50 p-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 resize-none overflow-hidden shadow-lg"
-          placeholder={subjectId ? "Ask anything about your subject..." : "Select a subject to start chatting..."}
+          placeholder={
+            subjectId
+              ? "Ask anything about your subject..."
+              : "Select a subject to start chatting..."
+          }
           value={message}
           onChange={handleChange}
           rows={1}
@@ -78,8 +84,7 @@ const UserControl: React.FC<UserControlProps> = ({ subjectId }) => {
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default UserControl
-
+export default UserControl;

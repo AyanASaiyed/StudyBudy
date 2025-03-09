@@ -81,7 +81,7 @@ const HomePage = () => {
   return (
     <div className="overflow-hidden relative flex h-screen text-white bg-gradient-to-br from-slate-900 to-indigo-950">
       {/* Sidebar */}
-      <div className="h-screen w-[9vw] bg-slate-800/40 backdrop-blur-sm border-r border-slate-700/50 overflow-hidden z-10">
+      <div className="h-screen w-[9vw] bg-slate-800/40 backdrop-blur-sm border-r border-slate-700/50 overflow-auto z-10">
         <Subjects setCurrentSubjectId={setCurrentSubjectId} />
       </div>
 

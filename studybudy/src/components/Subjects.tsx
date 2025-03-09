@@ -1,5 +1,6 @@
 "use client";
 
+import supabase from "@/lib/supabase";
 import type React from "react";
 import { useEffect, useState } from "react";
 
@@ -31,6 +32,25 @@ const Subjects: React.FC<SubjectsProps> = ({ setCurrentSubjectId }) => {
       }
     };
     fetchData();
+
+    const channel = supabase
+      .channel("realtime:subjects")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "subjects" },
+        (payload) => {
+          console.log("SUBJECTS CHANGED: ", payload.new);
+          setSubjects((prev) => [
+            ...prev,
+            { id: payload.new.id, subject_name: payload.new.subject_name },
+          ]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleSubjectChange = (id: string) => {
@@ -39,7 +59,7 @@ const Subjects: React.FC<SubjectsProps> = ({ setCurrentSubjectId }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center mt-4">
+    <div className="flex flex-col items-center justify-center my-4">
       <div className="flex flex-col gap-4 items-center">
         {subjects.map((subject) => (
           <div

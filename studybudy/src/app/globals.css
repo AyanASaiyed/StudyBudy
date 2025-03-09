@@ -119,13 +119,37 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ...existing code... */
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3); /* slate-400 with opacity */
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5); /* slightly more visible on hover */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    /*background: rgb(10, 10, 10);*/
-    background: radial-gradient(rgb(0, 60, 48), black,black);
+    background: radial-gradient(
+      circle at center,
+      rgb(30, 41, 59),
+      rgb(15, 23, 42),
+      rgb(49, 46, 129)
+    );
   }
 }
