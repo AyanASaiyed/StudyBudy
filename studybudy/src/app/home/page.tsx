@@ -12,6 +12,8 @@ import Subjects from "../../components/Subjects";
 const HomePage = () => {
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [addSubOpen, setAddSubOpen] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState("");
   const [currentSubjectId, setCurrentSubjectId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
@@ -40,43 +42,76 @@ const HomePage = () => {
 
   if (status === "loading") {
     return (
-      <div className="text-white flex flex-col items-center justify-center h-screen font-mono">
-        Loading...
-        <p>(refresh if it's taking too long.)</p>
+      <div className="flex flex-col items-center justify-center h-screen font-mono text-white bg-gradient-to-br from-slate-900 to-indigo-950">
+        <div className="p-8 rounded-lg bg-slate-800/70 backdrop-blur-sm border border-slate-700/50">
+          <p className="text-xl">Loading...</p>
+          <p className="text-sm text-slate-400 mt-2">
+            (refresh if it's taking too long.)
+          </p>
+        </div>
       </div>
     );
   }
 
+  const handleAddSubject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSubjectName.trim()) return;
+
+    try {
+      const res = await fetch("/api/subjects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ subject_name: newSubjectName }),
+      });
+
+      const data = await res.json();
+      if (data.error) {
+        console.error("Error creating subject:", data.error);
+      } else {
+        setNewSubjectName("");
+        setCurrentSubjectId(null);
+      }
+    } catch (error) {
+      console.error("Error creating subject:", error);
+    }
+  };
+
   return (
-    <div className="relative flex flex-col items-center justify-center h-screen text-white">
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
-        <h1 className="font-semibold">Welcome, {session?.user?.name}!</h1>
+    <div className="overflow-hidden relative flex h-screen text-white bg-gradient-to-br from-slate-900 to-indigo-950">
+      {/* Sidebar */}
+      <div className="h-screen w-[9vw] bg-slate-800/40 backdrop-blur-sm border-r border-slate-700/50 overflow-hidden z-10">
+        <Subjects setCurrentSubjectId={setCurrentSubjectId} />
       </div>
-      <div className="absolute top-4 right-4 flex items-center space-x-4">
-        <div ref={avatarRef}>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col relative">
+        {/* Header with Avatar */}
+        <div className="absolute top-2 right-4 z-20" ref={avatarRef}>
           <Avatar
-            className="shadow-black border-teal-400 border-1 shadow-sm size-12 cursor-pointer hover:border-white"
+            className="cursor-pointer border-2 border-indigo-500/50 hover:border-indigo-400 transition-all shadow-lg size-12"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <AvatarImage src={session?.user?.image!} />
-            <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
+            <AvatarFallback className="bg-indigo-600">
+              {session?.user?.name?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
 
           {isDropdownOpen && (
             <div
               ref={dropdownRef}
-              className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-neutral-900 border border-teal-400 overflow-hidden z-10"
+              className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 overflow-hidden z-20"
             >
-              <div className="p-4 border-b border-neutral-800">
+              <div className="p-4 border-b border-slate-700/50">
                 <p className="text-sm font-semibold">{session?.user?.name}</p>
-                <p className="text-xs text-neutral-400 mt-1">
-                  {session?.user?.email}
-                </p>
+                <p className="text-xs text-slate-400">{session?.user?.email}</p>
               </div>
               <div className="p-2">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-sm hover:bg-neutral-800 hover:text-teal-400"
+                  className="w-full justify-start text-sm hover:bg-slate-700/50 hover:text-indigo-400"
                   onClick={handleSignOut}
                 >
                   Logout
@@ -85,18 +120,64 @@ const HomePage = () => {
             </div>
           )}
         </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 p-4 pt-16">
+          <div className="h-[78vh] bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-lg overflow-y-auto shadow-lg">
+            {currentSubjectId === null ? (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-white text-2xl font-light">
+                  Select or Create a subject to start learning! 🥳
+                </p>
+              </div>
+            ) : (
+              <Messages subjectId={currentSubjectId ?? ""} />
+            )}
+          </div>
+        </div>
+
+        {/* User Control */}
+        <div className="p-4 flex justify-center">
+          <UserControl subjectId={currentSubjectId} />
+        </div>
       </div>
-      <div className="h-screen left-0 w-[9vw] rounded-r-lg bg-neutral-950 absolute shadow-black shadow-xl border-r-1 border-teal-400 overflow-hidden">
-        <Subjects setCurrentSubjectId={setCurrentSubjectId} />{" "}
-      </div>
-      <div className="flex flex-col items-center justify-center">
-        <section className="bg-neutral-950 border-teal-400 border-1 h-[80vh] mb-15 w-[80vw] ml-15 rounded-xl">
-          <Messages subjectId={currentSubjectId ?? ''} />
-        </section>
-        <section className="mt-5 flex flex-col items-center justify-center">
-          <UserControl subjectId={currentSubjectId} />{" "}
-        </section>
-      </div>
+      {currentSubjectId === "add-sub" && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-800/90 rounded-lg p-6 w-80 border border-slate-700/50">
+            <h3 className="text-lg font-medium text-white mb-4">
+              Create New Subject
+            </h3>
+            <form onSubmit={handleAddSubject}>
+              <input
+                type="text"
+                value={newSubjectName}
+                onChange={(e) => setNewSubjectName(e.target.value)}
+                placeholder="Enter subject name"
+                className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                autoFocus
+              />
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentSubjectId(null);
+                    setNewSubjectName("");
+                  }}
+                  className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-500 transition-colors"
+                >
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
