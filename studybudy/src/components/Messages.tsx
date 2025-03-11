@@ -10,6 +10,7 @@ interface MessagesProps {
 
 interface Message {
   message: string;
+  id?: string;
 }
 
 const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
@@ -67,8 +68,21 @@ const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
         </div>
       ) : (
         messages.map((messageObj, index) => (
-          <div key={index} className="ml-auto max-w-xs">
-            <div className="bg-indigo-600/70 backdrop-blur-sm break-words text-white rounded-xl rounded-tr-sm p-3 shadow-md">
+          <div
+            key={index}
+            className={`${
+              messageObj.id === "GEMINI"
+                ? "mr-auto" // Align left for GEMINI
+                : "ml-auto" // Align right for user
+            } max-w-xs`}
+          >
+            <div
+              className={`backdrop-blur-sm break-words text-white rounded-xl p-3 shadow-md ${
+                messageObj.id === "GEMINI"
+                  ? "bg-slate-700/70 rounded-tl-sm" // Different color and rounded corner for GEMINI
+                  : "bg-indigo-600/70 rounded-tr-sm" // Original style for user
+              }`}
+            >
               {messageObj.message}
             </div>
           </div>

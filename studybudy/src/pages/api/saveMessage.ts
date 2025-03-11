@@ -2,37 +2,81 @@ import authOptions from "@/lib/authOptions";
 import supabase from "@/lib/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getServerSession(req, res, authOptions);
+  try {
+    const session = await getServerSession(req, res, authOptions);
 
-  if (!session) {
-    return res.status(401).json({ error: "User not authorized." });
+    if (!session) {
+      return res.status(401).json({ error: "User not authorized." });
+    }
+
+    const { message, subjectId } = req.body;
+    const userEmail = session.user?.email;
+
+    // Get user and subject info in parallel
+    const [userId, subjectName] = await Promise.all([
+      supabase.from("profiles").select("id").eq("email", userEmail).single(),
+      supabase
+        .from("subjects")
+        .select("subject_name")
+        .eq("id", subjectId)
+        .single(),
+    ]);
+
+    if (userId.error || !userId.data) {
+      return res.status(402).json({ error: "User not found in Database." });
+    }
+
+    if (subjectName.error || !subjectName.data) {
+      return res.status(406).json({ error: "Subject not found." });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    console.log("subject name ---", subjectName.data!.subject_name);
+
+    console.log("user id --- ", userId.data.id);
+
+    const prompt = `You are a tutor and the subject you are an expert of is ${
+      subjectName.data!.subject_name
+    }
+    and the message that your student has asked you is: ${message} please aid the student in better understanding the topic.`;
+
+    const result = await model.generateContent(prompt);
+    const aiResponse = await result.response.text();
+
+    console.log("AI RESPONSE: ", aiResponse);
+
+    // Save user message
+    const { error: msgError } = await supabase.from("messages").insert({
+      senderid: userId.data.id,
+      subjectid: subjectId,
+      message: message,
+    });
+
+    if (msgError) {
+      return res.status(400).json({ error: msgError.message });
+    }
+
+    // Save AI message
+    const { error: aiError } = await supabase.from("messages").insert({
+      senderid: "GEMINI",
+      subjectid: subjectId,
+      message: aiResponse,
+    });
+
+    if (aiError) {
+      return res
+        .status(408)
+        .json({ error: "Error saving AI message in database" });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("API Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  const { message, subjectId } = req.body;
-
-  const userEmail = session.user?.email;
-
-  const { data: user, error: userError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", userEmail)
-    .single();
-
-  if (userError || !user) {
-    return res.status(402).json({ error: "User not found in Database." });
-  }
-
-  const { data: msgData, error } = await supabase.from("messages").insert({
-    senderid: user.id,
-    subjectid: subjectId,
-    message: message,
-  });
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  return res.status(200).json({ data: msgData });
 };

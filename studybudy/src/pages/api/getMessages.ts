@@ -10,7 +10,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(401).json({ error: "User not authorized." });
   }
 
-  const { subjectId } = req.body; // Extract subjectId from the request body
+  const { subjectId } = req.body;
   const userEmail = session.user?.email;
 
   const { data: user, error: userError } = await supabase
@@ -26,7 +26,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { data: subjectMessages, error } = await supabase
     .from("messages")
     .select("message")
-    .eq("senderid", user.id)
     .eq("subjectid", subjectId);
 
   if (error) {

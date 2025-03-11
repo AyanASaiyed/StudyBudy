@@ -51,7 +51,7 @@ const UserControl: React.FC<UserControlProps> = ({ subjectId }) => {
       >
         <textarea
           ref={textareaRef}
-          className="w-full rounded-xl bg-slate-800/70 max-h-[10vh] backdrop-blur-sm border border-slate-700/50 p-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 resize-none overflow-hidden shadow-lg"
+          className="w-full overflow-y-auto rounded-xl bg-slate-800/70 max-h-[10vh] backdrop-blur-sm border border-slate-700/50 p-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 resize-none overflow-hidden shadow-lg"
           placeholder={
             subjectId
               ? "Ask anything about your subject..."
