@@ -19,9 +19,9 @@ export default async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token && path !== "/") {
-    return NextResponse.indigoirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   } else if (token && path === "/") {
-    return NextResponse.indigoirect(new URL("/home", req.url));
+    return NextResponse.redirect(new URL("/home", req.url));
   }
 
   return NextResponse.next();

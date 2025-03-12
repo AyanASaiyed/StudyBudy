@@ -10,7 +10,7 @@ interface MessagesProps {
 
 interface Message {
   message: string;
-  id?: string;
+  senderid: string; // Add senderid to the interface
 }
 
 const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
@@ -29,7 +29,6 @@ const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
 
         const data = await res.json();
         if (Array.isArray(data.data)) {
-          console.log("MESSAGES!!", data.data);
           setMessages(data.data);
         } else {
           console.error("Unexpected response format:", data);
@@ -51,11 +50,14 @@ const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
           table: "messages",
         },
         (payload) => {
-          console.log("MESSAGES RECEIVED: ", payload.new);
           setMessages((prev) => [...prev, payload.new as Message]);
         }
       )
       .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [subjectId]);
 
   return (
@@ -71,15 +73,15 @@ const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
           <div
             key={index}
             className={`${
-              messageObj.id === "GEMINI"
+              messageObj.senderid === "GEMINI"
                 ? "mr-auto" // Align left for GEMINI
                 : "ml-auto" // Align right for user
             } max-w-xs`}
           >
             <div
               className={`backdrop-blur-sm break-words text-white rounded-xl p-3 shadow-md ${
-                messageObj.id === "GEMINI"
-                  ? "bg-slate-700/70 rounded-tl-sm" // Different color and rounded corner for GEMINI
+                messageObj.senderid === "GEMINI"
+                  ? "bg-slate-700/70 rounded-tl-sm" // Different color for GEMINI
                   : "bg-indigo-600/70 rounded-tr-sm" // Original style for user
               }`}
             >

@@ -43,9 +43,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const prompt = `You are a tutor and the subject you are an expert of is ${
       subjectName.data!.subject_name
     }
-    and the message that your student has asked you is: ${message} please aid the student in better understanding the topic.`;
+    and the message that your student has asked you is: ${message} please aid the student in better understanding the topic.
+     Keep your message brief but informative. Do not add markup language syntax, keep it simple english and format in answers in paragraphs rather than
+     creating lists and such.`;
 
+    console.time("AI Generation");
     const result = await model.generateContent(prompt);
+    console.timeEnd("AI Generation"); // Check how long it takes
+
     const aiResponse = await result.response.text();
 
     console.log("AI RESPONSE: ", aiResponse);
@@ -61,17 +66,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: msgError.message });
     }
 
-    // Save AI message
+    const AI_UUID = "00000000-0000-0000-0000-000000000000";
+
     const { error: aiError } = await supabase.from("messages").insert({
-      senderid: "GEMINI",
+      senderid: AI_UUID,
       subjectid: subjectId,
       message: aiResponse,
     });
 
     if (aiError) {
-      return res
-        .status(408)
-        .json({ error: "Error saving AI message in database" });
+      console.error("AI Message Insert Error:", aiError);
+      return res.status(408).json({ aiError });
     }
 
     return res.status(200).json({ success: true });

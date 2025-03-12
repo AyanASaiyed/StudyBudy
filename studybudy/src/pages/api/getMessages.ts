@@ -25,7 +25,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   const { data: subjectMessages, error } = await supabase
     .from("messages")
-    .select("message")
+    .select("message, senderid")
     .eq("subjectid", subjectId);
 
   if (error) {
