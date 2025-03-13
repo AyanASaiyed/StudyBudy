@@ -44,10 +44,10 @@ const UserControl: React.FC<UserControlProps> = ({ subjectId }) => {
   };
 
   return (
-    <div className="w-[60vw]">
+    <div className="flex items-center justify-center">
       <form
         onSubmit={handleSubmit}
-        className="relative flex items-center justify-center"
+        className="w-[60vw] relative flex items-center justify-center"
       >
         <textarea
           ref={textareaRef}
@@ -83,6 +83,19 @@ const UserControl: React.FC<UserControlProps> = ({ subjectId }) => {
           </svg>
         </button>
       </form>
+      <div className="rounded-xl w-[7vh] h-[7vh] bg-indigo-700 border-1 border-gray-600 hover:bg-indigo-800 hover:border-gray-700 ml-5 items-center justify-center flex">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          className="bi bi-projector size-8"
+          viewBox="0 0 16 16"
+        >
+          <path d="M14 7.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M2.5 6a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm0 2a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1z" />
+          <path d="M0 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2 1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1H5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1 2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z" />
+        </svg>
+      </div>
     </div>
   );
 };

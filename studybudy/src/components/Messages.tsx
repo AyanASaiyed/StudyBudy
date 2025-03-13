@@ -73,14 +73,14 @@ const Messages: React.FC<MessagesProps> = ({ subjectId }) => {
           <div
             key={index}
             className={`${
-              messageObj.senderid === "GEMINI"
-                ? "mr-auto" // Align left for GEMINI
-                : "ml-auto" // Align right for user
+              messageObj.senderid === "00000000-0000-0000-0000-000000000000"
+                ? "mr-auto max-w-2xl" // Align left for GEMINI
+                : "ml-auto max-w-xs" // Align right for user
             } max-w-xs`}
           >
             <div
               className={`backdrop-blur-sm break-words text-white rounded-xl p-3 shadow-md ${
-                messageObj.senderid === "GEMINI"
+                messageObj.senderid === "00000000-0000-0000-0000-000000000000"
                   ? "bg-slate-700/70 rounded-tl-sm" // Different color for GEMINI
                   : "bg-indigo-600/70 rounded-tr-sm" // Original style for user
               }`}

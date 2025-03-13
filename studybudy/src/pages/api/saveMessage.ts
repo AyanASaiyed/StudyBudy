@@ -44,8 +44,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       subjectName.data!.subject_name
     }
     and the message that your student has asked you is: ${message} please aid the student in better understanding the topic.
-     Keep your message brief but informative. Do not add markup language syntax, keep it simple english and format in answers in paragraphs rather than
-     creating lists and such.`;
+     Do not add markup language syntax.`;
 
     console.time("AI Generation");
     const result = await model.generateContent(prompt);
