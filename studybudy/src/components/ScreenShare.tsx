@@ -1,6 +1,35 @@
 import React from "react";
 
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 const ScreenShare = () => {
+  function startSpeechRecognition() {
+    const recognition = new (window.SpeechRecognition ||
+      window.webkitSpeechRecognition)();
+
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => console.log("Speech recognition started...");
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("Transcribed Text:", transcript);
+
+      document.body.innerHTML += `<p>Recognized: ${transcript}</p>`;
+    };
+
+    recognition.onerror = (event: any) => console.error("Error:", event.error);
+    recognition.onend = () => console.log("Speech recognition ended.");
+
+    recognition.start();
+  }
+
   const shareScreen = async () => {
     const options = {
       video: true,
@@ -9,6 +38,7 @@ const ScreenShare = () => {
     };
 
     try {
+      startSpeechRecognition();
       const stream = await navigator.mediaDevices.getDisplayMedia(options);
       const video = document.createElement("video");
 
@@ -25,7 +55,7 @@ const ScreenShare = () => {
           ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
           const imgUrl = canvas.toDataURL("image/png");
-          console.log("Screenshot Captured: ", imgUrl);
+          //console.log("Screenshot Captured: ", imgUrl);
         }
       }
 
