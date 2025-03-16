@@ -9,7 +9,32 @@ const ScreenShare = () => {
     };
 
     try {
-      const mediaScreen = await navigator.mediaDevices.getDisplayMedia(options);
+      const stream = await navigator.mediaDevices.getDisplayMedia(options);
+      const video = document.createElement("video");
+
+      video.srcObject = stream;
+      video.play();
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      function captureFrame() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          const imgUrl = canvas.toDataURL("image/png");
+          console.log("Screenshot Captured: ", imgUrl);
+        }
+      }
+
+      const interval = setInterval(captureFrame, 3000);
+
+      stream.getVideoTracks()[0].addEventListener("ended", () => {
+        clearInterval(interval);
+        console.log("Screen Share Stopped.");
+      });
     } catch (error) {
       console.log("Error sharing screen: ", error);
     }
