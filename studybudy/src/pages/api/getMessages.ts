@@ -20,7 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     .single();
 
   if (userError || !user) {
-    return res.status(404).json({ error: "User not found in database" });
+    return res.status(405).json({ error: "User not found in database" });
   }
 
   const { data: subjectMessages, error } = await supabase

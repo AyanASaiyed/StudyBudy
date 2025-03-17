@@ -9,7 +9,7 @@ declare global {
 
 const ScreenShare = () => {
   const [isSharing, setIsSharing] = useState(false);
-  const [recognition, setRecognition] = useState(null);
+  const [VoiceRecognition, setVoiceRecognition] = useState<any>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [captureInterval, setCaptureInterval] = useState<NodeJS.Timeout | null>(
     null
@@ -18,27 +18,31 @@ const ScreenShare = () => {
   useEffect(() => {
     const recognition = new (window.SpeechRecognition ||
       window.webkitSpeechRecognition)();
-
     recognition.lang = "en-US";
     recognition.continuous = true;
     recognition.interimResults = false;
-    setRecognition(recognition);
+    setVoiceRecognition(recognition);
   }, []);
 
   function startSpeechRecognition() {
-    if (!recognition) return;
+    if (!VoiceRecognition) return;
 
-    recognition!.onstart = () => console.log("Speech recognition started...");
-    recognition!.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
+    VoiceRecognition.onstart = () =>
+      console.log("Speech recognition started...");
+
+    VoiceRecognition.onresult = (event: any) => {
+      const transcript = event.results[event.results.length - 1][0].transcript;
       console.log("Transcribed Text:", transcript);
-
-      // document.body.innerHTML += <p>Recognized: ${transcript}</p>;
     };
 
-    recognition!.onerror = (event: any) => console.error("Error:", event.error);
-    recognition!.onend = () => console.log("Speech recognition ended.");
-    recognition!.start();
+    VoiceRecognition.onerror = (event: any) =>
+      console.error("Error:", event.error);
+
+    VoiceRecognition.onend = () => {
+      console.log("Speech Recognition ended.");
+    };
+
+    VoiceRecognition.start();
   }
 
   const shareScreen = async () => {
@@ -52,6 +56,7 @@ const ScreenShare = () => {
 
       setScreenStream(stream);
       setIsSharing(true);
+      console.log("isSharing: ", isSharing);
 
       const video = document.createElement("video");
       video.srcObject = stream;
@@ -72,13 +77,6 @@ const ScreenShare = () => {
       }
 
       const intervalId = setInterval(captureFrame, 3000);
-
-      stream.getVideoTracks()[0].addEventListener("ended", () => {
-        clearInterval(intervalId);
-        setRecognition(null);
-        console.log("Screen Share Stopped.");
-      });
-
       setCaptureInterval(intervalId);
 
       stream.getVideoTracks()[0].addEventListener("ended", stopShare);
@@ -90,24 +88,42 @@ const ScreenShare = () => {
   };
 
   const stopShare = () => {
-    if (screenStream) {
-      screenStream.getTracks().forEach((track) => track.stop());
-    }
     if (captureInterval) {
       clearInterval(captureInterval);
       setCaptureInterval(null);
     }
 
-    if (recognition) {
-      recognition.stop(); // Stop the microphone
+    if (VoiceRecognition) {
+      VoiceRecognition.stop();
       console.log("Microphone turned off.");
+    }
+
+    if (screenStream) {
+      screenStream.getTracks().forEach((track) => track.stop());
     }
 
     setScreenStream(null);
     setIsSharing(false);
-    setRecognition(null);
     console.log("Screen sharing stopped.");
   };
+
+  useEffect(() => {
+    if (screenStream) {
+      const handleTrackEnded = () => {
+        stopShare();
+      };
+
+      screenStream
+        .getVideoTracks()[0]
+        .addEventListener("ended", handleTrackEnded);
+
+      return () => {
+        screenStream
+          .getVideoTracks()[0]
+          .removeEventListener("ended", handleTrackEnded);
+      };
+    }
+  }, [screenStream]);
 
   return (
     <div className="ml-5 flex items-center justify-center">
